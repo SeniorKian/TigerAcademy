@@ -15,6 +15,7 @@
 - [پیش‌نیازها](#-پیشنیازها)
 - [راه‌اندازی محلی (بدون Docker)](#-راهاندازی-محلی-بدون-docker)
 - [راه‌اندازی با Docker Compose](#-راهاندازی-با-docker-compose)
+- [اجرای مستقل ایمیج (بدون دیتابیس داخل ایمیج)](#-اجرای-مستقل-ایمیج-بدون-دیتابیس-داخل-ایمیج)
 - [ویزارد نصب اولیه](#-ویزارد-نصب-اولیه)
 - [نقش‌های کاربری و پنل ادمین](#-نقشهای-کاربری-و-پنل-ادمین)
 - [متغیرهای محیطی](#-متغیرهای-محیطی)
@@ -159,6 +160,29 @@ docker compose up --build
 ```
 
 اپلیکیشن (فرانت + بک‌اند به‌صورت یکپارچه) روی `http://localhost:5100` در دسترس است.
+
+---
+
+## 🐋 اجرای مستقل ایمیج (بدون دیتابیس داخل ایمیج)
+
+`Dockerfile` پروژه یک ایمیج **خودکفا** می‌سازد: فقط فرانت (React) + بک‌اند (ASP.NET Core) — هیچ دیتابیسی داخل ایمیج نیست. اگر نمی‌خواهید از `docker-compose.yml` (که یک کانتینر PostgreSQL هم بالا می‌آورد) استفاده کنید و می‌خواهید فقط به یک PostgreSQL موجود (روی هاست، سرور دیگر یا سرویس ابری) وصل شوید، کافی‌ست ایمیج را بسازید و آدرس دیتابیس را حین اجرا از طریق env بدهید:
+
+```bash
+# ۱) ساخت ایمیج (شامل بیلد خودکار فرانت + بک‌اند، بدون نیاز به دیتابیس)
+docker build -t tigerapp .
+
+# ۲) اجرا با دیتابیس خارجی — آدرس را در یک فایل env مستقل تعریف کنید
+cat > .env.docker <<'EOF'
+ConnectionStrings__DefaultConnection=Host=YOUR_DB_HOST;Port=5432;Database=tigerapp;Username=tigerapp;Password=YOUR_DB_PASSWORD;Timeout=5
+JwtSettings__Secret=YOUR_RANDOM_32PLUS_CHAR_SECRET
+EOF
+
+docker run -d --name tigerapp -p 5100:5100 --env-file .env.docker tigerapp
+```
+
+> ⚠️ این فایل env با `.env.example` فرق دارد: مقدار `${POSTGRES_DB}` و مشابه آن در `.env.example` فقط توسط **Docker Compose** جایگزین می‌شود؛ `docker run --env-file` چنین جایگزینی‌ای انجام نمی‌دهد، پس در این حالت باید کانکشن‌استرینگ را کامل و به‌صورت مقدار نهایی (literal) بنویسید.
+
+سلامت کانتینر روی `http://localhost:5100/health` (با `HEALTHCHECK` داخل خود ایمیج) قابل بررسی است — نیازی به Compose برای healthcheck نیست.
 
 ---
 

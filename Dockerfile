@@ -1,3 +1,10 @@
+# Self-contained app image: React SPA + ASP.NET Core API, built in one `docker build`.
+# No database is bundled here — provide it at `docker run` time via env vars, e.g.:
+#   docker run -p 5100:5100 --env-file .env tigerapp
+# Required env vars (see .env.example):
+#   ConnectionStrings__DefaultConnection  -> full Npgsql connection string to your PostgreSQL server
+#   JwtSettings__Secret                   -> random string, at least 32 characters
+
 # Stage 1: Build React frontend
 FROM node:22-alpine AS frontend-build
 WORKDIR /app/tigerapp.client
@@ -42,5 +49,9 @@ EXPOSE 5100
 # Set environment variables
 ENV ASPNETCORE_URLS=http://+:5100
 ENV ASPNETCORE_ENVIRONMENT=Production
+
+# Works without Docker Compose too, since curl and the /health endpoint live in this image already.
+HEALTHCHECK --interval=30s --timeout=10s --start-period=15s --retries=3 \
+    CMD curl --fail --silent http://localhost:5100/health || exit 1
 
 ENTRYPOINT ["dotnet", "TigerApp.Api.dll"]
