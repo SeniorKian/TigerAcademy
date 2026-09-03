@@ -254,9 +254,31 @@ npm run build   # شامل type-check با tsc -b
 
 ## 🚀 استقرار (Deployment)
 
-`Dockerfile` یک ایمیج تک‌مرحله‌ای نهایی می‌سازد که هم API و هم فایل‌های استاتیک فرانت را سرو می‌کند (پورت `5100`، health check روی `/health`). برای Production:
+`Dockerfile` یک ایمیج تک‌مرحله‌ای نهایی می‌سازد که هم API و هم فایل‌های استاتیک فرانت را سرو می‌کند (پورت `5100`، health check روی `/health`).
+
+### روش سریع (توصیه‌شده): pull ایمیج آماده به‌جای build روی سرور
+
+بیلد کردن ایمیج (npm ci + npm run build + dotnet restore/publish) روی هر بار دیپلوی کند است. به‌جایش، [`.github/workflows/docker-image.yml`](.github/workflows/docker-image.yml) با هر push به `main` ایمیج را می‌سازد و در **GitHub Container Registry** پوش می‌کند — سرور فقط باید ایمیج آمادهٔ ساخته‌شده را pull کند:
+
+```bash
+docker pull ghcr.io/seniorkian/tigeracademy:latest
+docker run -d --name tigerapp -p 5100:5100 --env-file .env.docker \
+  --restart unless-stopped ghcr.io/seniorkian/tigeracademy:latest
+```
+
+نکات:
+- پکیج در GHCR به‌طور پیش‌فرض **private** است؛ یا از تنظیمات پکیج در گیت‌هاب آن را public کنید، یا روی سرور یک‌بار `docker login ghcr.io -u <username>` با یک Personal Access Token دارای دسترسی `read:packages` بزنید.
+- برای آپدیت بعدی فقط کافی‌ست دوباره `docker pull ... && docker stop tigerapp && docker rm tigerapp` و دستور `docker run` بالا را تکرار کنید (یا با Watchtower/کرون خودکارش کنید).
+- برای Rollback سریع، به‌جای `:latest` می‌توانید تگ `:sha-<commit>` مشخصی را pull کنید (هر کامیت روی `main` یک تگ SHA جدا هم می‌گیرد).
+
+### روش قدیمی: build مستقیم روی سرور
+
+اگر ترجیح می‌دهید همان‌جا build کنید (یا هنوز Actions را فعال نکرده‌اید):
 
 1. `.env` را با مقادیر واقعی (پسورد قوی دیتابیس، `TIGERAPP_JWT_SECRET` تصادفی) پر کنید.
 2. `docker compose up --build -d` را روی سرور اجرا کنید.
+
+### در هر دو حالت
+
 3. پشت یک ریورس‌پروکسی (Nginx/Caddy) با HTTPS قرار دهید.
 4. ویزارد نصب (`/install`) را یک‌بار تکمیل کنید.

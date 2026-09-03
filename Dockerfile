@@ -1,15 +1,20 @@
+# syntax=docker/dockerfile:1
 # Self-contained app image: React SPA + ASP.NET Core API, built in one `docker build`.
 # No database is bundled here — provide it at `docker run` time via env vars, e.g.:
 #   docker run -p 5100:5100 --env-file .env tigerapp
 # Required env vars (see .env.example):
 #   ConnectionStrings__DefaultConnection  -> full Npgsql connection string to your PostgreSQL server
 #   JwtSettings__Secret                   -> random string, at least 32 characters
+#
+# Rebuild speed: npm/NuGet downloads are cached with BuildKit mount caches (persist across builds
+# even when a layer is invalidated), and .github/workflows/docker-image.yml builds+pushes this
+# image on every push to main so servers only ever `docker pull` instead of building from source.
 
 # Stage 1: Build React frontend
 FROM node:22-alpine AS frontend-build
 WORKDIR /app/tigerapp.client
 COPY tigerapp.client/package*.json ./
-RUN npm ci
+RUN --mount=type=cache,target=/root/.npm npm ci
 COPY tigerapp.client/ ./
 RUN npm run build
 
@@ -20,9 +25,9 @@ COPY src/TigerApp.Domain/TigerApp.Domain.csproj src/TigerApp.Domain/
 COPY src/TigerApp.Application/TigerApp.Application.csproj src/TigerApp.Application/
 COPY src/TigerApp.Infrastructure/TigerApp.Infrastructure.csproj src/TigerApp.Infrastructure/
 COPY src/TigerApp.Api/TigerApp.Api.csproj src/TigerApp.Api/
-RUN dotnet restore src/TigerApp.Api/TigerApp.Api.csproj
+RUN --mount=type=cache,target=/root/.nuget/packages dotnet restore src/TigerApp.Api/TigerApp.Api.csproj
 COPY src/ src/
-RUN dotnet publish src/TigerApp.Api/TigerApp.Api.csproj -c Release -o /app/publish --no-restore
+RUN --mount=type=cache,target=/root/.nuget/packages dotnet publish src/TigerApp.Api/TigerApp.Api.csproj -c Release -o /app/publish --no-restore
 
 # Stage 3: Final image
 FROM mcr.microsoft.com/dotnet/aspnet:10.0 AS final
