@@ -1,0 +1,23 @@
+.tiger-alert-container { z-index: 2000; }
+.tiger-alert-container.swal2-backdrop-show { background: rgba(7,20,40,.6); backdrop-filter: blur(5px); }
+.tiger-alert-container.tiger-toast-container,
+.tiger-alert-container:has(.swal2-toast) { background: transparent !important; backdrop-filter: none !important; }
+.swal2-popup.tiger-alert { direction: rtl; font-family: inherit; width: min(29rem, calc(100vw - 2rem)); border: 1px solid #e3e9f1; border-radius: 24px; padding: 1.7rem 1.5rem 1.5rem; box-shadow: 0 30px 100px -24px rgba(7,20,40,.5); color: #10213b; }
+.tiger-alert .tiger-alert-title { padding: 0; margin-top: .75rem; font-size: 1.2rem; font-weight: 850; line-height: 1.8; }
+.tiger-alert .tiger-alert-text { margin: .7rem 0 0; color: #57667b; font-size: .9rem; line-height: 2; white-space: pre-line; overflow-wrap: anywhere; }
+.tiger-alert .swal2-icon { margin: 0 auto .4rem; transform: scale(.85); }
+.tiger-alert .tiger-alert-actions { display: flex; flex-wrap: wrap; gap: .65rem; width: 100%; margin: 1.6rem 0 0; }
+.tiger-alert-confirm, .tiger-alert-cancel { min-height: 46px; flex: 1; padding: .7rem 1.1rem; border-radius: 12px; font: inherit; font-size: .85rem; font-weight: 750; cursor: pointer; transition: background 160ms ease; }
+.tiger-alert-confirm { background: #1e3a5f; color: white; border: 1px solid transparent; }
+.tiger-alert[data-tone="danger"] .tiger-alert-confirm { background: #b91c1c; }
+.tiger-alert-confirm:hover { filter: brightness(.92); }
+.tiger-alert-cancel { background: #f4f7fb; border: 1px solid #dce4ee; color: #34445a; }
+.tiger-alert-cancel:hover { background: #e8eef6; }
+.tiger-alert button:focus-visible, .tiger-alert-input:focus { outline: 3px solid #d49a20; outline-offset: 3px; box-shadow: none; }
+.tiger-alert button:disabled { opacity: .6; cursor: wait; }
+.tiger-alert .tiger-alert-input { width: 100%; margin: .7rem 0; padding: .7rem; height: 48px; font-size: .9rem; border: 1px solid #ced8e5; border-radius: 12px; box-sizing: border-box; }
+.tiger-alert .tiger-alert-validation { border-radius: 12px; background: #fff1f2; color: #9f1239; margin: .8rem 0 0; font-size: .8rem; line-height: 1.9; }
+.swal2-popup.tiger-alert.swal2-toast { width: min(25rem, calc(100vw - 2rem)); padding: .9rem; border-radius: 16px; }
+.tiger-alert.swal2-toast .tiger-alert-title { font-size: .85rem; margin: 0 .5rem; }
+@media (max-width: 420px) { .swal2-popup.tiger-alert { padding: 1.25rem 1rem; } .tiger-alert .tiger-alert-actions { flex-direction: column; } .tiger-alert-actions button { width: 100%; } }
+@media (prefers-reduced-motion: reduce) { .tiger-alert, .tiger-alert * { animation: none !important; transition: none !important; } }

@@ -1,0 +1,6 @@
+@TigerApp.Server_HostAddress = http://localhost:5068
+
+GET {{TigerApp.Server_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###

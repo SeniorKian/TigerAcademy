@@ -1,0 +1,7 @@
+<Solution>
+  <Project Path="tigerapp.client/tigerapp.client.esproj">
+    <Build />
+    <Deploy />
+  </Project>
+  <Project Path="TigerApp.Server/TigerApp.Server.csproj" />
+</Solution>

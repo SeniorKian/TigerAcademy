@@ -1,0 +1,12 @@
+.env
+.env.*
+!.env.example
+App_Data/
+logs/
+*.db
+*.db-shm
+*.db-wal
+**/bin/
+**/obj/
+**/node_modules/
+**/dist/

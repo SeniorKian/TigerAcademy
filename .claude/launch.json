@@ -1,0 +1,11 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "tigerapp-client",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["--prefix", "tigerapp.client", "run", "dev"],
+      "port": 3000
+    }
+  ]
+}

@@ -1,0 +1,8 @@
+Using launch settings from D:\TigerAcademy\src\TigerApp.Api\Properties\launchSettings.json...
+D:\TigerAcademy\src\TigerApp.Infrastructure\TigerApp.Infrastructure.csproj : warning NU1903: Package 'SQLitePCLRaw.lib.e_sqlite3' 2.1.11 has a known high severity vulnerability, https://github.com/advisories/GHSA-2m69-gcr7-jv3q [D:\TigerAcademy\src\TigerApp.Api\TigerApp.Api.csproj]
+D:\TigerAcademy\src\TigerApp.Api\TigerApp.Api.csproj : warning NU1903: Package 'SQLitePCLRaw.lib.e_sqlite3' 2.1.11 has a known high severity vulnerability, https://github.com/advisories/GHSA-2m69-gcr7-jv3q
+D:\TigerAcademy\src\TigerApp.Api\TigerApp.Api.csproj : warning NU1903: Package 'SQLitePCLRaw.lib.e_sqlite3' 2.1.11 has a known high severity vulnerability, https://github.com/advisories/GHSA-2m69-gcr7-jv3q
+D:\TigerAcademy\src\TigerApp.Infrastructure\TigerApp.Infrastructure.csproj : warning NU1903: Package 'SQLitePCLRaw.lib.e_sqlite3' 2.1.11 has a known high severity vulnerability, https://github.com/advisories/GHSA-2m69-gcr7-jv3q
+[21:15:28 INF] Starting TigerApp API...
+[21:15:29 INF] TigerApp is running on http://localhost:5100
+[21:15:29 INF] Admin Panel: http://localhost:5100/login

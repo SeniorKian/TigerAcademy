@@ -1,0 +1,30 @@
+import React, { useEffect, useState } from 'react';
+import { FiCheckCircle, FiCreditCard, FiGlobe, FiSave, FiSettings, FiShield } from 'react-icons/fi';
+import apiClient from '@/api/apiClient';
+import { Button, Card, Input, Skeleton } from '@/design-system';
+
+interface SystemSettings {
+  siteName: string; siteSubtitle: string; supportPhone: string; supportEmail: string; footerText: string;
+  defaultLanguage: string; registrationEnabled: boolean; maintenanceMode: boolean;
+  onlinePaymentEnabled: boolean; zarinpalMerchantId: string; zarinpalSandbox: boolean; paymentCallbackUrl: string;
+  cardToCardEnabled: boolean; cardNumber: string; cardHolder: string;
+}
+const defaults: SystemSettings = { siteName: 'تایگر آکادمی', siteSubtitle: '', supportPhone: '', supportEmail: '', footerText: '', defaultLanguage: 'fa', registrationEnabled: true, maintenanceMode: false, onlinePaymentEnabled: false, zarinpalMerchantId: '', zarinpalSandbox: true, paymentCallbackUrl: '/api/payments/zarinpal/callback', cardToCardEnabled: false, cardNumber: '', cardHolder: '' };
+
+const SettingsPage: React.FC = () => {
+  const [form, setForm] = useState<SystemSettings>(defaults); const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false); const [message, setMessage] = useState(''); const [error, setError] = useState('');
+  useEffect(() => { let active = true; apiClient.get<SystemSettings>('/settings').then(response => { if (active) setForm({ ...defaults, ...response.data }); }).catch(() => { if (active) setError('دریافت تنظیمات ناموفق بود.'); }).finally(() => { if (active) setLoading(false); }); return () => { active = false; }; }, []);
+  const save = async () => { setSaving(true); setError(''); setMessage(''); try { await apiClient.put('/settings', form); setMessage('تنظیمات با موفقیت ذخیره شد.'); } catch { setError('ذخیره تنظیمات انجام نشد؛ فیلدهای درگاه را بررسی کنید.'); } finally { setSaving(false); } };
+  if (loading) return <div className="space-y-5"><Skeleton className="h-20 rounded-xl" /><Skeleton className="h-72 rounded-xl" /></div>;
+  return <div className="space-y-6 fade-in"><div><span className="admin-page-eyebrow"><FiSettings /> پیکربندی مرکزی</span><h1>تنظیمات سیستم</h1><p>هویت سایت، رفتار عمومی و روش‌های پرداخت را از این بخش کنترل کنید.</p></div>
+    {message && <div className="p-4 rounded-xl bg-green-50 text-green-700 flex items-center gap-2"><FiCheckCircle /> {message}</div>}{error && <div className="auth-error">{error}</div>}
+    <Card padding="lg"><div className="admin-card-heading mb-5"><div><span>هویت سامانه</span><h2 className="flex items-center gap-2"><FiGlobe /> نام و اطلاعات عمومی</h2></div></div><div className="grid grid-cols-1 md:grid-cols-2 gap-4"><Input label="نام سیستم" value={form.siteName} onChange={e => setForm({ ...form, siteName: e.target.value })} /><Input label="زیرعنوان" value={form.siteSubtitle} onChange={e => setForm({ ...form, siteSubtitle: e.target.value })} /><Input label="تلفن پشتیبانی" value={form.supportPhone} onChange={e => setForm({ ...form, supportPhone: e.target.value })} dir="ltr" /><Input label="ایمیل پشتیبانی" type="email" value={form.supportEmail} onChange={e => setForm({ ...form, supportEmail: e.target.value })} dir="ltr" /><div className="md:col-span-2"><Input label="متن پایین سایت" value={form.footerText} onChange={e => setForm({ ...form, footerText: e.target.value })} /></div></div><div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-5"><Toggle label="ثبت‌نام کاربران فعال باشد" checked={form.registrationEnabled} onChange={value => setForm({ ...form, registrationEnabled: value })} /><Toggle label="حالت تعمیر و نگهداری" checked={form.maintenanceMode} onChange={value => setForm({ ...form, maintenanceMode: value })} /></div></Card>
+    <Card padding="lg"><div className="admin-card-heading mb-5"><div><span>پرداخت آنلاین</span><h2 className="flex items-center gap-2"><FiCreditCard /> درگاه زرین‌پال</h2></div><Toggle label="فعال" checked={form.onlinePaymentEnabled} onChange={value => setForm({ ...form, onlinePaymentEnabled: value })} /></div><div className="grid grid-cols-1 md:grid-cols-2 gap-4"><Input label="Merchant ID" value={form.zarinpalMerchantId} onChange={e => setForm({ ...form, zarinpalMerchantId: e.target.value })} dir="ltr" placeholder="xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx" /><Input label="آدرس بازگشت" value={form.paymentCallbackUrl} onChange={e => setForm({ ...form, paymentCallbackUrl: e.target.value })} dir="ltr" /><div className="md:col-span-2"><Toggle label="حالت آزمایشی Sandbox" checked={form.zarinpalSandbox} onChange={value => setForm({ ...form, zarinpalSandbox: value })} /></div></div><p className="text-xs text-slate-500 mt-4 flex gap-2"><FiShield /> تا زمانی که درگاه فعال و Merchant ID وارد نشده باشد، سفارش‌ها در وضعیت «در انتظار پرداخت» ثبت می‌شوند.</p></Card>
+    <Card padding="lg"><div className="admin-card-heading mb-5"><div><span>پرداخت جایگزین</span><h2 className="flex items-center gap-2"><FiCreditCard /> کارت‌به‌کارت</h2></div><Toggle label="فعال" checked={form.cardToCardEnabled} onChange={value => setForm({ ...form, cardToCardEnabled: value })} /></div><div className="grid grid-cols-1 md:grid-cols-2 gap-4"><Input label="شماره کارت" value={form.cardNumber} onChange={e => setForm({ ...form, cardNumber: e.target.value })} dir="ltr" /><Input label="نام صاحب کارت" value={form.cardHolder} onChange={e => setForm({ ...form, cardHolder: e.target.value })} /></div></Card>
+    <div className="sticky bottom-4 flex justify-end"><Button size="lg" loading={saving} onClick={save} leftIcon={<FiSave />}>ذخیره همه تنظیمات</Button></div>
+  </div>;
+};
+
+const Toggle: React.FC<{ label: string; checked: boolean; onChange: (value: boolean) => void }> = ({ label, checked, onChange }) => <label className="flex items-center justify-between gap-3 p-3 rounded-xl border border-slate-200 bg-slate-50 cursor-pointer"><span className="text-sm font-medium">{label}</span><input type="checkbox" checked={checked} onChange={e => onChange(e.target.checked)} className="w-5 h-5" /></label>;
+export default SettingsPage;
