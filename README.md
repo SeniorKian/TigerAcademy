@@ -262,9 +262,11 @@ npm run build   # شامل type-check با tsc -b
 
 ```bash
 docker pull ghcr.io/seniorkian/tigeracademy:latest
-docker run -d --name tigerapp -p 5100:5100 --env-file .env.docker \
+docker run -d --name tigerapp -p 127.0.0.1:5100:5100 --env-file .env.docker \
   --restart unless-stopped ghcr.io/seniorkian/tigeracademy:latest
 ```
+
+> پورت را فقط روی `127.0.0.1` منتشر کنید تا مستقیماً از اینترنت در دسترس نباشد — ریورس‌پروکسی (بخش بعد) از همان سرور به آن وصل می‌شود.
 
 نکات:
 - پکیج در GHCR به‌طور پیش‌فرض **private** است؛ یا از تنظیمات پکیج در گیت‌هاب آن را public کنید، یا روی سرور یک‌بار `docker login ghcr.io -u <username>` با یک Personal Access Token دارای دسترسی `read:packages` بزنید.
@@ -280,5 +282,5 @@ docker run -d --name tigerapp -p 5100:5100 --env-file .env.docker \
 
 ### در هر دو حالت
 
-3. پشت یک ریورس‌پروکسی (Nginx/Caddy) با HTTPS قرار دهید.
+3. پورت `5100` را فقط روی `127.0.0.1` منتشر کنید (`-p 127.0.0.1:5100:5100`) و پشت یک ریورس‌پروکسی با HTTPS قرار دهید — نمونهٔ آماده: [`deploy/Caddyfile`](deploy/Caddyfile) یا [`deploy/nginx.conf`](deploy/nginx.conf). DNS دامنه فقط باید یک رکورد `A` به IP سرور باشد؛ پورت جایی در DNS تنظیم نمی‌شود، ریورس‌پروکسی روی 80/443 گوش می‌دهد و به‌صورت داخلی به 5100 وصل می‌شود.
 4. ویزارد نصب (`/install`) را یک‌بار تکمیل کنید.
