@@ -66,6 +66,13 @@ public class CreateOrderCommandHandler : IRequestHandler<CreateOrderCommand, Res
             Status = OrderStatus.Pending,
             TrackingCode = trackingCode,
             Notes = request.Notes,
+            PreferredDate = request.Type == OrderType.Consultation
+                && request.PreferredDateShamsi.TryToGregorian(out var preferredDate)
+                    ? preferredDate.Date
+                    : null,
+            PreferredTimeRange = request.Type == OrderType.Consultation
+                ? request.PreferredTimeRange?.Trim()
+                : null,
             CreatedAt = DateTime.UtcNow
         };
 
@@ -106,6 +113,9 @@ public class CreateOrderCommandHandler : IRequestHandler<CreateOrderCommand, Res
             },
             TrackingCode = order.TrackingCode,
             Notes = order.Notes,
+            PreferredDate = order.PreferredDate,
+            PreferredDateShamsi = order.PreferredDate?.ToPersianDate(),
+            PreferredTimeRange = order.PreferredTimeRange,
             IsActive = order.IsActive,
             CreatedAt = order.CreatedAt,
             CreatedAtShamsi = order.CreatedAt.ToPersianDateTime()

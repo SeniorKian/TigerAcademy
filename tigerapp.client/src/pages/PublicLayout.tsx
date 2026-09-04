@@ -35,19 +35,70 @@ const defaultNavLinks: NavLink[] = [
 const contactPhones = ['۰۹۱۲-۴۰۵-۴۵۷۵', '۰۹۱۸-۲۰۹-۳۰۳۶', '۰۹۰۲-۲۰۹-۳۰۳۶'];
 const defaultBranding = { siteName: 'تایگر آکادمی', siteSubtitle: 'انتخاب آگاهانه، آینده روشن', supportPhone: '09124054575', footerText: 'طراحی شده برای انتخاب‌های روشن‌تر', registrationEnabled: true, maintenanceMode: false };
 
+let cancelActivePageScroll: (() => void) | null = null;
+
+const animatePageScroll = (targetTop: number) => {
+  cancelActivePageScroll?.();
+
+  const root = document.documentElement;
+  const startTop = window.scrollY;
+  const distance = Math.max(0, targetTop) - startTop;
+  if (Math.abs(distance) < 2) {
+    window.scrollTo(0, Math.max(0, targetTop));
+    return;
+  }
+
+  const previousScrollBehavior = root.style.scrollBehavior;
+  const duration = Math.min(760, Math.max(440, Math.abs(distance) * 0.18));
+  const startedAt = performance.now();
+  let frame = 0;
+  let finished = false;
+
+  root.style.scrollBehavior = 'auto';
+  const cleanup = () => {
+    if (finished) return;
+    finished = true;
+    if (frame) window.cancelAnimationFrame(frame);
+    root.style.scrollBehavior = previousScrollBehavior;
+    cancelActivePageScroll = null;
+  };
+  cancelActivePageScroll = cleanup;
+
+  const step = (now: number) => {
+    const progress = Math.min(1, (now - startedAt) / duration);
+    const eased = progress < 0.5
+      ? 4 * progress * progress * progress
+      : 1 - Math.pow(-2 * progress + 2, 3) / 2;
+    window.scrollTo(0, startTop + distance * eased);
+
+    if (progress < 1) {
+      frame = window.requestAnimationFrame(step);
+      return;
+    }
+
+    root.style.scrollBehavior = previousScrollBehavior;
+    finished = true;
+    cancelActivePageScroll = null;
+  };
+
+  frame = window.requestAnimationFrame(step);
+};
+
 const PublicLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [menuOpen, setMenuOpen] = useState(false);
   const [openDropdown, setOpenDropdown] = useState<string | null>(null);
   const [navLinks, setNavLinks] = useState(defaultNavLinks);
   const [branding, setBranding] = useState(defaultBranding);
   const { isAuthenticated, canAccessAdmin, logout } = useAuth();
-  const showManagementLink = !isAuthenticated || canAccessAdmin;
-  const managementUrl = isAuthenticated ? '/admin/dashboard' : '/login?returnTo=%2Fadmin%2Fdashboard';
-  const managementLabel = isAuthenticated ? 'پنل مدیریت' : 'ورود مدیران';
+  const showManagementLink = isAuthenticated && canAccessAdmin;
+  const managementUrl = '/admin/dashboard';
+  const managementLabel = 'پنل مدیریت';
   const navigate = useNavigate();
   const location = useLocation();
   const currentPersianYear = new Intl.DateTimeFormat('fa-IR-u-ca-persian', { year: 'numeric' }).format(new Date());
   const displayedPhones = branding.supportPhone ? [branding.supportPhone, ...contactPhones.slice(1)] : contactPhones;
+
+  useEffect(() => () => cancelActivePageScroll?.(), []);
 
   useEffect(() => {
     let active = true;
@@ -93,21 +144,38 @@ const PublicLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => 
       return;
     }
     const target = to.startsWith('#') ? `/${to}` : to;
+    if (target === '/') {
+      if (location.pathname !== '/') {
+        navigate('/');
+        window.setTimeout(() => animatePageScroll(0), 120);
+      } else {
+        window.history.replaceState(window.history.state, '', '/');
+        animatePageScroll(0);
+      }
+      return;
+    }
+
     if (!target.startsWith('/#')) {
       navigate(target);
       return;
     }
 
     const id = target.slice(2);
+    const scrollToSection = () => {
+      const element = document.getElementById(id);
+      if (!element) return;
+      const headerHeight = document.querySelector<HTMLElement>('.site-header')?.offsetHeight ?? 0;
+      const top = Math.max(0, window.scrollY + element.getBoundingClientRect().top - headerHeight - 12);
+      animatePageScroll(top);
+    };
+
     if (location.pathname === '/') {
-      document.getElementById(id)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      scrollToSection();
       return;
     }
 
-    navigate(`/#${id}`);
-    window.setTimeout(() => {
-      document.getElementById(id)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    }, 120);
+    navigate('/');
+    window.setTimeout(scrollToSection, 120);
   };
 
   const signOut = async () => {
@@ -220,7 +288,7 @@ const PublicLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => 
         </div>
       </header>
 
-      <main id="main-content" className="flex-1">{children}</main>
+      <main id="main-content" className="flex-1" data-route-scroll-container>{children}</main>
 
       <footer className="site-footer">
         <Container size="xl">

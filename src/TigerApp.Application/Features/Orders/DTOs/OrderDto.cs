@@ -22,6 +22,9 @@ public class OrderDto
     public DateTime? PaidAt { get; set; }
     public string? PaidAtShamsi { get; set; }
     public string? Notes { get; set; }
+    public DateTime? PreferredDate { get; set; }
+    public string? PreferredDateShamsi { get; set; }
+    public string? PreferredTimeRange { get; set; }
     public bool IsActive { get; set; }
     public DateTime CreatedAt { get; set; }
     public string? CreatedAtShamsi { get; set; }

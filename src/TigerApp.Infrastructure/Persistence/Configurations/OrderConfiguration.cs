@@ -26,10 +26,17 @@ public class OrderConfiguration : IEntityTypeConfiguration<Order>
         
         builder.Property(o => o.Notes)
             .HasMaxLength(1000);
+
+        builder.Property(o => o.PreferredDate)
+            .HasColumnType("date");
+
+        builder.Property(o => o.PreferredTimeRange)
+            .HasMaxLength(50);
         
         builder.HasIndex(o => o.UserId);
         builder.HasIndex(o => o.Status);
         builder.HasIndex(o => o.CreatedAt);
+        builder.HasIndex(o => o.PreferredDate);
         
         // Navigation
         builder.HasOne(o => o.Payment)

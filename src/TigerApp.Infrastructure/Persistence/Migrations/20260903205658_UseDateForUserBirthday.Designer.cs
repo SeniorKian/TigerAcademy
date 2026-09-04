@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using TigerApp.Infrastructure.Persistence.Context;
@@ -11,9 +12,11 @@ using TigerApp.Infrastructure.Persistence.Context;
 namespace TigerApp.Infrastructure.Persistence.Migrations
 {
     [DbContext(typeof(TigerAppDbContext))]
-    partial class TigerAppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260903205658_UseDateForUserBirthday")]
+    partial class UseDateForUserBirthday
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -368,13 +371,6 @@ namespace TigerApp.Infrastructure.Persistence.Migrations
                     b.Property<int?>("PlanId")
                         .HasColumnType("integer");
 
-                    b.Property<DateTime?>("PreferredDate")
-                        .HasColumnType("date");
-
-                    b.Property<string>("PreferredTimeRange")
-                        .HasMaxLength(50)
-                        .HasColumnType("character varying(50)");
-
                     b.Property<int>("Status")
                         .HasColumnType("integer");
 
@@ -398,8 +394,6 @@ namespace TigerApp.Infrastructure.Persistence.Migrations
                     b.HasIndex("CreatedAt");
 
                     b.HasIndex("PlanId");
-
-                    b.HasIndex("PreferredDate");
 
                     b.HasIndex("Status");
 

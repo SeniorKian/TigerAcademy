@@ -48,6 +48,11 @@ public class UserConfiguration : IEntityTypeConfiguration<User>
         
         builder.Property(u => u.TelegramId)
             .HasMaxLength(100);
+
+        // A birthday is a calendar date, not an instant in a time zone. Mapping it
+        // to PostgreSQL date also avoids Npgsql rejecting DateTimeKind.Unspecified.
+        builder.Property(u => u.Birthday)
+            .HasColumnType("date");
         
         builder.HasIndex(u => u.PhoneNumber)
             .IsUnique();

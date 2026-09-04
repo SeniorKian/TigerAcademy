@@ -24,6 +24,7 @@ import PaymentsPage from '@/pages/PaymentsPage';
 import InstallPage from '@/pages/InstallPage';
 import { InstallationGate } from '@/installation/InstallationGate';
 import { getSafeReturnTo } from '@/utils/navigation';
+import PageTransitionLoader from '@/components/PageTransitionLoader';
 
 // Loading spinner while auth state initializes from localStorage
 const AuthLoading: React.FC = () => (
@@ -72,6 +73,7 @@ const ProfileRoute: React.FC = () => {
 const App: React.FC = () => {
   return (
     <BrowserRouter>
+      <PageTransitionLoader />
       <InstallationGate>
         <AuthProvider>
         <Routes>

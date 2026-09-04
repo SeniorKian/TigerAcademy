@@ -11,4 +11,6 @@ public class CreateOrderCommand : IRequest<Result<OrderDto>>
     public int? PlanId { get; set; }
     public int? ConsultationId { get; set; }
     public string? Notes { get; set; }
+    public string? PreferredDateShamsi { get; set; }
+    public string? PreferredTimeRange { get; set; }
 }

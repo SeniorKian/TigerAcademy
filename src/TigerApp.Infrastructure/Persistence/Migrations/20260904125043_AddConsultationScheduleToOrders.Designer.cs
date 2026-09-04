@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using TigerApp.Infrastructure.Persistence.Context;
@@ -11,9 +12,11 @@ using TigerApp.Infrastructure.Persistence.Context;
 namespace TigerApp.Infrastructure.Persistence.Migrations
 {
     [DbContext(typeof(TigerAppDbContext))]
-    partial class TigerAppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260904125043_AddConsultationScheduleToOrders")]
+    partial class AddConsultationScheduleToOrders
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder

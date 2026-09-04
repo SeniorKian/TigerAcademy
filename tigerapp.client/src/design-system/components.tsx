@@ -170,26 +170,33 @@ export const Caption: React.FC<CaptionProps> = ({ children, color = 'default', c
 interface InputProps extends InputHTMLAttributes<HTMLInputElement> {
   label?: string; helperText?: string; error?: boolean; icon?: ReactNode;
 }
-export const Input: React.FC<InputProps> = ({ label, helperText, error = false, icon, className = '', ...props }) => (
-  <div className="w-full">
-    {label && <Label required={props.required} htmlFor={props.id}>{label}</Label>}
-    <div className="relative">
-      {icon && <span className="absolute right-3 top-1/2 -translate-y-1/2" style={{ color: T.color['muted-fg'] }}>{icon}</span>}
-      <input
-        className={`w-full px-3.5 py-2.5 text-sm rounded-lg border transition-all duration-200
-          placeholder:opacity-50 focus:outline-none focus:ring-2 focus:ring-offset-0
-          disabled:opacity-50 disabled:cursor-not-allowed
-          ${icon ? 'pr-10' : ''}
-          ${error ? `border-[${T.color.danger}] focus:ring-[${T.color.danger}]/20`
-            : `border-[${T.color.border}] focus:border-[${T.color.primary}] focus:ring-[${T.color.primary}]/10`}
-          ${className}`}
-        style={{ background: T.color.surface, color: T.color.fg, borderColor: error ? T.color.danger : T.color.border }}
-        {...props}
-      />
+export const Input: React.FC<InputProps> = ({ label, helperText, error = false, icon, className = '', ...props }) => {
+  const generatedId = useId();
+  const inputId = props.id || generatedId;
+  const helperId = helperText ? `${inputId}-help` : undefined;
+  return (
+    <div className="w-full">
+      {label && <Label required={props.required} htmlFor={inputId}>{label}</Label>}
+      <div className="relative">
+        {icon && <span aria-hidden="true" className="absolute right-3 top-1/2 -translate-y-1/2" style={{ color: T.color['muted-fg'] }}>{icon}</span>}
+        <input
+          {...props}
+          id={inputId}
+          className={`w-full px-3.5 py-2.5 text-sm rounded-lg border transition-all duration-200
+            placeholder:opacity-50 focus:outline-none focus:ring-2 focus:ring-offset-0
+            disabled:opacity-50 disabled:cursor-not-allowed
+            ${icon ? 'pr-10' : ''}
+            ${error ? `border-[${T.color.danger}] focus:ring-[${T.color.danger}]/20`
+              : `border-[${T.color.border}] focus:border-[${T.color.primary}] focus:ring-[${T.color.primary}]/10`}
+            ${className}`}
+          style={{ background: T.color.surface, color: T.color.fg, borderColor: error ? T.color.danger : T.color.border }}
+          aria-describedby={props['aria-describedby'] || helperId}
+        />
+      </div>
+      {helperText && <p id={helperId} className="mt-1.5 text-xs" style={{ color: error ? T.color.danger : T.color['muted-fg'] }}>{helperText}</p>}
     </div>
-    {helperText && <Caption color={error ? 'danger' : 'muted'} className="mt-1.5">{helperText}</Caption>}
-  </div>
-);
+  );
+};
 
 // ─── Textarea ────────────────────────────────────────────────────────────────
 interface TextareaProps extends TextareaHTMLAttributes<HTMLTextAreaElement> {

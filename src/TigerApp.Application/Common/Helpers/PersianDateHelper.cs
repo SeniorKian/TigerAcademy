@@ -16,6 +16,8 @@ public static class PersianDateHelper
     private static DateTime InIran(this DateTime date) => date.Kind == DateTimeKind.Utc
         ? TimeZoneInfo.ConvertTimeFromUtc(date, IranTimeZone)
         : date;
+
+    public static DateTime TodayInIran() => TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, IranTimeZone).Date;
     
     public static string ToPersianDate(this DateTime date)
     {
@@ -75,5 +77,24 @@ public static class PersianDateHelper
         var day = int.Parse(parts[2]);
         
         return Pc.ToDateTime(year, month, day, 0, 0, 0, 0);
+    }
+
+    public static bool TryToGregorian(this string? persianDate, out DateTime date)
+    {
+        date = default;
+        if (string.IsNullOrWhiteSpace(persianDate))
+            return false;
+
+        try
+        {
+            date = persianDate.ToGregorian().Date;
+            return true;
+        }
+        catch (Exception exception) when (exception is FormatException
+            or OverflowException
+            or ArgumentOutOfRangeException)
+        {
+            return false;
+        }
     }
 }

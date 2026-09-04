@@ -7,6 +7,8 @@ interface PersianDatePickerProps {
   label?: string;
   minYear?: number;
   maxYear?: number;
+  error?: string;
+  disablePast?: boolean;
 }
 
 const monthNames = ['فروردین', 'اردیبهشت', 'خرداد', 'تیر', 'مرداد', 'شهریور', 'مهر', 'آبان', 'آذر', 'دی', 'بهمن', 'اسفند'];
@@ -80,7 +82,7 @@ const parseDate = (value: string) => {
   return { year: Number(match[1]), month: Number(match[2]), day: Number(match[3]) };
 };
 
-const PersianDatePicker: React.FC<PersianDatePickerProps> = ({ value, onChange, label = 'تاریخ تولد شمسی', minYear = 1300, maxYear }) => {
+const PersianDatePicker: React.FC<PersianDatePickerProps> = ({ value, onChange, label = 'تاریخ تولد شمسی', minYear = 1300, maxYear, error, disablePast = false }) => {
   const today = useMemo(() => getToday(), []);
   const inputId = useId();
   const selected = parseDate(value);
@@ -89,6 +91,7 @@ const PersianDatePicker: React.FC<PersianDatePickerProps> = ({ value, onChange, 
   const [viewMonth, setViewMonth] = useState(selected?.month || today.month);
   const rootRef = useRef<HTMLDivElement>(null);
   const finalMaxYear = maxYear || today.year;
+  const errorId = `${inputId}-error`;
 
   useEffect(() => {
     if (!open) return;
@@ -119,6 +122,13 @@ const PersianDatePicker: React.FC<PersianDatePickerProps> = ({ value, onChange, 
 
   const selectDay = (day: number) => {
     onChange(`${viewYear}/${String(viewMonth).padStart(2, '0')}/${String(day).padStart(2, '0')}`);
+    setOpen(false);
+  };
+
+  const selectToday = () => {
+    setViewYear(today.year);
+    setViewMonth(today.month);
+    onChange(`${today.year}/${String(today.month).padStart(2, '0')}/${String(today.day).padStart(2, '0')}`);
     setOpen(false);
   };
 
@@ -162,11 +172,15 @@ const PersianDatePicker: React.FC<PersianDatePickerProps> = ({ value, onChange, 
           }}
           aria-haspopup="dialog"
           aria-expanded={open}
+          aria-invalid={Boolean(error)}
+          aria-describedby={error ? errorId : undefined}
+          style={error ? { borderColor: '#dc2626' } : undefined}
         />
         <button type="button" className="persian-datepicker-trigger" onClick={() => setOpen(current => !current)} aria-label="باز کردن تقویم شمسی" aria-expanded={open}>
           <FiCalendar aria-hidden="true" />
         </button>
       </div>
+      {error && <p id={errorId} className="profile-field-error" role="alert">{error}</p>}
       {open && <>
         <button type="button" className="persian-datepicker-backdrop" onClick={() => setOpen(false)} aria-label="بستن تقویم" />
         <div className="persian-datepicker-popover" role="dialog" aria-modal="false" aria-label="انتخاب تاریخ شمسی">
@@ -185,11 +199,14 @@ const PersianDatePicker: React.FC<PersianDatePickerProps> = ({ value, onChange, 
             {Array.from({ length: daysInMonth }, (_, index) => index + 1).map(day => {
               const isSelected = selected?.year === viewYear && selected.month === viewMonth && selected.day === day;
               const isToday = today.year === viewYear && today.month === viewMonth && today.day === day;
-              return <button key={day} type="button" className={`${isSelected ? 'is-selected' : ''} ${isToday ? 'is-today' : ''}`} onClick={() => selectDay(day)} aria-pressed={isSelected}>{toPersianDigits(day)}</button>;
+              const isPast = disablePast && (viewYear < today.year
+                || (viewYear === today.year && viewMonth < today.month)
+                || (viewYear === today.year && viewMonth === today.month && day < today.day));
+              return <button key={day} type="button" disabled={isPast} className={`${isSelected ? 'is-selected' : ''} ${isToday ? 'is-today' : ''}`} onClick={() => selectDay(day)} aria-pressed={isSelected}>{toPersianDigits(day)}</button>;
             })}
           </div>
           <div className="persian-datepicker-footer">
-            <button type="button" onClick={() => { setViewYear(today.year); setViewMonth(today.month); }}>امروز</button>
+            <button type="button" onClick={selectToday}>انتخاب امروز</button>
             {value && <button type="button" onClick={() => { onChange(''); setOpen(false); }}>پاک کردن</button>}
           </div>
         </div>

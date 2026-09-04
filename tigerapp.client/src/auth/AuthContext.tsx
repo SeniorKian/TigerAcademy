@@ -15,6 +15,7 @@ interface AuthContextType {
   loading: boolean;
   login: (phoneNumber: string, password: string) => Promise<boolean>;
   logout: () => Promise<void>;
+  updateUserName: (fullName: string) => void;
   isAuthenticated: boolean;
   isAdmin: boolean;
   canAccessAdmin: boolean;
@@ -70,6 +71,20 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     localStorage.removeItem('user');
   }, []);
 
+  const updateUserName = useCallback((fullName: string) => {
+    const [firstName, ...lastNameParts] = fullName.trim().split(/\s+/);
+    setUser(current => {
+      if (!current) return current;
+      const updated = {
+        ...current,
+        firstName: firstName || current.firstName,
+        lastName: lastNameParts.join(' '),
+      };
+      localStorage.setItem('user', JSON.stringify(updated));
+      return updated;
+    });
+  }, []);
+
   return (
     <AuthContext.Provider
       value={{
@@ -78,6 +93,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         loading,
         login,
         logout,
+        updateUserName,
         isAuthenticated: !!token,
         isAdmin: user?.role === 'Admin',
         canAccessAdmin: ['Admin', 'Consultant', 'ContentManager'].includes(user?.role || ''),

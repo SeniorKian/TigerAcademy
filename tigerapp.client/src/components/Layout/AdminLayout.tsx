@@ -127,7 +127,7 @@ const AdminLayout: React.FC<LayoutProps> = ({ children }) => {
             <span className="admin-avatar admin-avatar-small" aria-hidden="true">{initials}</span>
           </div>
         </header>
-        <main className="admin-main">{children}</main>
+        <main className="admin-main" data-route-scroll-container>{children}</main>
       </div>
     </div>
   );

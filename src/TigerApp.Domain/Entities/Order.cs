@@ -14,6 +14,8 @@ public class Order : BaseEntity
     public string? PaymentReference { get; set; }
     public DateTime? PaidAt { get; set; }
     public string? Notes { get; set; }
+    public DateTime? PreferredDate { get; set; }
+    public string? PreferredTimeRange { get; set; }
     
     // Navigation
     public User User { get; set; } = null!;

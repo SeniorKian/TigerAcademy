@@ -23,6 +23,8 @@ interface Order {
   createdAt: string;
   createdAtShamsi: string | null;
   paidAtShamsi: string | null;
+  preferredDateShamsi: string | null;
+  preferredTimeRange: string | null;
 }
 interface OrdersResult { items: Order[]; page: number; pageSize: number; totalCount: number; totalPages: number; }
 const emptyResult: OrdersResult = { items: [], page: 1, pageSize: 20, totalCount: 0, totalPages: 0 };
@@ -123,7 +125,7 @@ const OrdersPage: React.FC = () => {
                       {order.typeName}
                     </span>
                   </td>
-                  <td>{order.planName || order.consultationName || '—'}</td>
+                  <td><strong>{order.planName || order.consultationName || '—'}</strong>{order.preferredDateShamsi && <small className="block mt-1 text-slate-500">{order.preferredDateShamsi}، {order.preferredTimeRange}</small>}</td>
                   <td className="persian-number font-bold text-orange-500">
                     {new Intl.NumberFormat('fa-IR').format(order.amount)} ت
                   </td>
