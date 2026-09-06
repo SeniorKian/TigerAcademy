@@ -26,14 +26,19 @@ type NavLink = { to: string; label: string; icon: IconType; children?: NavLink[]
 
 const defaultNavLinks: NavLink[] = [
   { to: '/', label: 'خانه', icon: FiHome },
-  { to: '/consultations', label: 'مشاوره', icon: FiMessageCircle },
   { to: '/#plans', label: 'طرح‌ها', icon: FiStar },
+  { to: '/consultations', label: 'مشاوره', icon: FiMessageCircle },
   { to: '/#faq', label: 'سوالات متداول', icon: FiHelpCircle },
   { to: '/#contact', label: 'تماس با ما', icon: FiPhone },
 ];
 
 const contactPhones = ['۰۹۱۲-۴۰۵-۴۵۷۵', '۰۹۱۸-۲۰۹-۳۰۳۶', '۰۹۰۲-۲۰۹-۳۰۳۶'];
 const defaultBranding = { siteName: 'تایگر آکادمی', siteSubtitle: 'انتخاب آگاهانه، آینده روشن', supportPhone: '09124054575', footerText: 'طراحی شده برای انتخاب‌های روشن‌تر', registrationEnabled: true, maintenanceMode: false };
+
+// PublicLayout currently lives inside each public page and is remounted on route changes.
+// Keep the last server-backed values at module scope so a remount never flashes the defaults.
+let cachedNavLinks: NavLink[] | null = null;
+let cachedBranding: typeof defaultBranding | null = null;
 
 let cancelActivePageScroll: (() => void) | null = null;
 
@@ -87,8 +92,8 @@ const animatePageScroll = (targetTop: number) => {
 const PublicLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [menuOpen, setMenuOpen] = useState(false);
   const [openDropdown, setOpenDropdown] = useState<string | null>(null);
-  const [navLinks, setNavLinks] = useState(defaultNavLinks);
-  const [branding, setBranding] = useState(defaultBranding);
+  const [navLinks, setNavLinks] = useState<NavLink[]>(() => cachedNavLinks ?? defaultNavLinks);
+  const [branding, setBranding] = useState(() => cachedBranding ?? defaultBranding);
   const { isAuthenticated, canAccessAdmin, logout } = useAuth();
   const showManagementLink = isAuthenticated && canAccessAdmin;
   const managementUrl = '/admin/dashboard';
@@ -112,6 +117,7 @@ const PublicLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => 
         icon: iconFor(item.link),
         children: (item.children || []).map(child => ({ to: normalize(child.link), label: child.title, icon: iconFor(child.link) })),
       }));
+      cachedNavLinks = links;
       setNavLinks(links);
     }).catch(() => undefined);
     return () => { active = false; };
@@ -119,7 +125,12 @@ const PublicLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => 
 
   useEffect(() => {
     let active = true;
-    apiClient.get('/settings/public').then(response => { if (active) setBranding({ ...defaultBranding, ...response.data }); }).catch(() => undefined);
+    apiClient.get('/settings/public').then(response => {
+      if (!active) return;
+      const nextBranding = { ...defaultBranding, ...response.data };
+      cachedBranding = nextBranding;
+      setBranding(nextBranding);
+    }).catch(() => undefined);
     return () => { active = false; };
   }, []);
 
